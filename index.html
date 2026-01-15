@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ヨガ×AI｜生徒用（Geminiでマニュアル作成）</title>
+  <style>
+    :root{--bg:#fff;--fg:#111;--muted:#666;--card:#f5f7fb;--border:#e6e8ef;--accent:#2a6df4;}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",sans-serif;
+      background:var(--bg); color:var(--fg);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .bar{
+      max-width:980px; margin:0 auto;
+      padding:12px 16px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+    }
+    .bar b{font-size:14px;color:var(--muted)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button:hover{border-color:rgba(42,109,244,.5)}
+    button.primary{
+      border-color:rgba(42,109,244,.6);
+      background:rgba(42,109,244,.08);
+    }
+    main{max-width:980px;margin:0 auto;padding:18px 16px 44px}
+    .hero{
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(135deg,#fff,var(--card));
+    }
+    .hero h1{margin:0 0 8px;font-size:28px;line-height:1.2}
+    .hero p{margin:0;color:var(--muted);font-weight:800;line-height:1.45}
+    .badge{
+      display:inline-block;
+      margin-top:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(42,109,244,.06);
+      font-weight:1000;
+      color:#234;
+      font-size:13px;
+    }
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+    .card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .cardHead{
+      padding:14px 14px 10px;
+      background:rgba(245,247,251,.85);
+      border-bottom:1px solid var(--border);
+    }
+    .kicker{margin:0 0 6px;color:var(--accent);font-weight:1000;font-size:12px;letter-spacing:.02em}
+    h2{margin:0;font-size:20px;line-height:1.25}
+    .cardBody{padding:14px; display:grid; gap:12px}
+    .note{color:var(--muted); font-weight:900; line-height:1.45; font-size:13px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .field{display:grid; gap:6px}
+    label{font-weight:1000}
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      font-size:16px;
+      font-weight:800;
+      outline:none;
+      background:#fff;
+    }
+    textarea{min-height:220px; resize:vertical; line-height:1.5}
+    .two{display:grid; grid-template-columns:1fr; gap:10px}
+    .footer{color:var(--muted); font-weight:800; font-size:13px; line-height:1.5}
+    .toast{
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      background:rgba(17,17,17,.92); color:#fff;
+      padding:10px 14px; border-radius:999px;
+      font-weight:1000; font-size:14px;
+      display:none; z-index:999;
+    }
+    .toast.show{display:block}
+    @media (min-width:860px){
+      .two{grid-template-columns:1fr 1fr}
+      textarea{min-height:260px}
+    }
+    @media print{header{display:none}}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="bar">
+    <b>ヨガ×AI｜生徒用（Geminiでマニュアル作成）</b>
+    <div class="btns">
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})">トップへ</button>
+      <button onclick="window.print()">PDFにする（印刷）</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>ヨガの“かんたんマニュアル”を作ろう</h1>
+    <p>①このページでポーズを選ぶ → ②Geminiに貼る → ③出た文章をNanoBananaへ</p>
+    <div class="badge">※ いたみが出たら中止。むりしない。</div>
+  </section>
+
+  <div class="grid">
+
+    <!-- そのままコピペ（最初の成功） -->
+    <section class="card">
+      <div class="cardHead">
+        <p class="kicker">STEP 0</p>
+        <h2>まずはそのまま（成功体験）</h2>
+      </div>
+      <div class="cardBody">
+        <div class="row">
+          <button class="primary" onclick="copyFrom('fixedPrompt')">📋 これをコピー → Geminiへ</button>
+          <button onclick="openGemini()">Geminiを開く</button>
+        </div>
+        <textarea id="fixedPrompt"></textarea>
+        <div class="note">コツ：短いほど成功します（1コマ3行まで）。</div>
+      </div>
+    </section>
+
+    <!-- 選んで作る（メイン） -->
+    <section class="card">
+      <div class="cardHead">
+        <p class="kicker">STEP 1</p>
+        <h2>選んで作る（メイン）</h2>
+      </div>
+      <div class="cardBody">
+
+        <div class="two">
+          <div class="field">
+            <label>タイトル</label>
+            <input id="titleInput" value="やさしいヨガ" />
+          </div>
+          <div class="field">
+            <label>背景（イメージ）</label>
+            <select id="bgSelect">
+              <option>白</option><option>和紙</option><option>森</option><option>空</option><option>海</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label>【1】コマ1（準備/立ち）</label>
+            <select id="sel1"></select>
+          </div>
+          <div class="field">
+            <label>【2】コマ2（動く/立ち）</label>
+            <select id="sel2"></select>
+          </div>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label>【3】コマ3（ゆるめる/座り）</label>
+            <select id="sel3"></select>
+          </div>
+          <div class="field">
+            <label>【4】コマ4（休む/寝）</label>
+            <select id="sel4"></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <button onclick="buildPrompt()">文章を作る</button>
+          <button class="primary" onclick="copyFrom('out')">📋 文章をコピー → Geminiへ</button>
+          <button onclick="openGemini()">Geminiを開く</button>
+        </div>
+
+        <div class="field">
+          <label>Geminiに貼る文章（ここをコピー）</label>
+          <textarea id="out" placeholder="「文章を作る」を押すとここに出ます"></textarea>
+        </div>
+
+        <div class="footer">
+          生徒の流れ：コピー → Gemini → 出た文章をNanoBananaへ（画像化）<br>
+          ※ 痛みが出たら中止。むりしない。
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="toast" id="toast">コピーしました</div>
+
+<!-- ✅ 重要：POSESは別ファイルで読み込む -->
+<script src="./poses.js"></script>
+
+<script>
+  // 初期の「そのままコピー」文（あなたの見本）
+  const DEFAULT_FIXED =
+`スマホで見やすい縦長9:16。
+4コマ（2×2）で「ヨガのかんたんマニュアル」を作る。
+文字は特大の太めゴシック。背景は（白/和紙/森/空/海）から選ぶ。
+各コマにシンプルな人物イラスト（正しい形）＋短い説明。文字が最優先で読みやすく。
+
+【タイトル】やさしいヨガ
+【注意】いたみが出たら中止。むりしない。
+
+【1】山（立ち／椅子OK）
+ねらい：姿勢・呼吸
+5回深呼吸／足うら均等／肩首ぬく
+椅子OK／ふらつきは壁へ
+
+【2】ねじり（椅子OK）
+ねらい：背中ほぐし
+背すじのばす→小さくねじる（5呼吸）
+椅子OK／いたみは戻す
+
+【3】ガス抜き（椅子版あり）
+ねらい：腰ゆるめ
+吐いてひざ抱え／首肩ぬく
+椅子版OK／腰痛は小さく
+
+【4】休息（横向きOK）
+ねらい：休む
+2分／全身ゆだねる／自然呼吸
+横向きOK／冷え対策`;
+
+  document.getElementById("fixedPrompt").value = DEFAULT_FIXED;
+
+  function toast(msg="コピーしました"){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1100);
+  }
+
+  function openGemini(){
+    window.open("https://gemini.google.com/","_blank","noopener,noreferrer");
+  }
+
+  async function copyFrom(id){
+    const el = document.getElementById(id);
+    const text = el.value || el.textContent || "";
+    if(!text){ toast("コピーする文字がない"); return; }
+    try{
+      await navigator.clipboard.writeText(text);
+      toast("コピーしました");
+    }catch(e){
+      el.focus(); el.select();
+      document.execCommand("copy");
+      toast("コピーしました");
+    }
+  }
+
+  function safePoses(){
+    return (window.POSES && Array.isArray(window.POSES) && window.POSES.length) ? window.POSES : [];
+  }
+
+  function fillSelect(selId, preferCat=null){
+    const sel = document.getElementById(selId);
+    sel.innerHTML = "";
+
+    const poses = safePoses();
+    const cats = ["立ち","座り","寝"];
+    const orderedCats = preferCat ? [preferCat, ...cats.filter(c=>c!==preferCat)] : cats;
+
+    orderedCats.forEach(cat=>{
+      const group = document.createElement("optgroup");
+      group.label = cat;
+      poses.filter(p=>p.cat===cat).forEach(p=>{
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name;
+        group.appendChild(opt);
+      });
+      if(group.children.length) sel.appendChild(group);
+    });
+  }
+
+  function getPoseById(id){
+    return safePoses().find(p=>p.id===id);
+  }
+
+  // Geminiに貼るプロンプトを作成
+  function buildPrompt(){
+    const title = (document.getElementById("titleInput").value || "やさしいヨガ").trim();
+    const bg = document.getElementById("bgSelect").value;
+
+    const p1 = getPoseById(document.getElementById("sel1").value);
+    const p2 = getPoseById(document.getElementById("sel2").value);
+    const p3 = getPoseById(document.getElementById("sel3").value);
+    const p4 = getPoseById(document.getElementById("sel4").value);
+
+    if(!p1 || !p2 || !p3 || !p4){
+      toast("ポーズが読めてない（poses.js確認）");
+      return;
+    }
+
+    const out =
+`あなたはやさしいヨガの先生です。
+高齢者でも安全にできる「4コマ（2×2）ヨガマニュアル」を日本語で作ってください。
+スマホで見やすく、文字は大きく、1コマ3行まで。やさしい言葉。誇大表現なし。
+背景は（${bg}）のイメージ。
+
+【タイトル】${title}
+【注意】いたみが出たら中止。むりしない。
+
+【1】${p1.name}
+${p1.line}
+
+【2】${p2.name}
+${p2.line}
+
+【3】${p3.name}
+${p3.line}
+
+【4】${p4.name}
+${p4.line}
+
+最後に「今日の回数の目安（例：各5呼吸）」を1行で付けてください。`;
+
+    document.getElementById("out").value = out;
+    toast("文章できた");
+  }
+
+  // 起動時：プルダウンを埋める（おすすめカテゴリ順）
+  fillSelect("sel1","立ち");
+  fillSelect("sel2","立ち");
+  fillSelect("sel3","座り");
+  fillSelect("sel4","寝");
+
+  // poses.jsが読めてない場合の救済
+  if(safePoses().length === 0){
+    document.getElementById("out").value =
+"poses.js が読み込めていません。リポジトリ直下に poses.js を置いて、index.html と同じ階層か確認してください。";
+  }
+</script>
+</body>
+</html>
